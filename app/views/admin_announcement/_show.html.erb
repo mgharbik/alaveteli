@@ -1,0 +1,33 @@
+<div class="row">
+  <% if announcements.size > 0 %>
+    <table class="table table-condensed table-hover span12 announcement-list">
+      <tr>
+        <th>Id</th>
+        <% Announcement.content_columns.each do |column| %>
+          <th><%= column.name.humanize %></th>
+        <% end %>
+        <th>Actions</th>
+      </tr>
+
+      <% announcements.each do |announcement| %>
+        <tr class="<%= cycle('odd', 'even') %>">
+          <td class="id"><%=h announcement.id %></td>
+          <% Announcement.content_columns.map { |c| c.name }.each do |column| %>
+            <td class="<%= column %>"><%=h announcement.send(column) %></td>
+          <% end %>
+          <td>
+            <%= link_to 'Edit', edit_admin_announcement_path(announcement) %>
+          </td>
+        </tr>
+      <% end %>
+    </table>
+  <% else %>
+    <p class="span12">None yet.</p>
+  <% end %>
+</div>
+
+<div class="row">
+  <p class="span12">
+    <%= link_to 'New announcement', new_admin_announcement_path, class: 'btn btn-warning' %>
+  </p>
+</div>
