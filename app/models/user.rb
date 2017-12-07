@@ -114,6 +114,8 @@ class User < ActiveRecord::Base
            :dependent => :destroy
   has_many :track_things_sent_emails,
            :dependent => :destroy
+  has_many :announcement_dismissals,
+           :dependent => :destroy
 
   scope :not_banned, -> { where(ban_text: "") }
 
