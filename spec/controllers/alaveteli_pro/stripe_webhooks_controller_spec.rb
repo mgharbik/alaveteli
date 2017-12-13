@@ -187,6 +187,47 @@ describe AlaveteliPro::StripeWebhooksController do
 
     end
 
+    context 'the webhook does not mention our plan' do
+
+      before do
+        config = MySociety::Config.load_default
+        config['STRIPE_NAMESPACE'] = 'WDTK'
+        config['STRIPE_WEBHOOK_SECRET'] = config_secret
+      end
+
+      it 'returns a 401 Unauthorized response' do
+        with_feature_enabled(:alaveteli_pro) do
+          request.headers.merge! signed_headers
+          post :receive, payload
+          expect(response.status).to eq(401)
+        end
+      end
+
+      it 'does not send an exception email' do
+        with_feature_enabled(:alaveteli_pro) do
+          request.headers.merge! signed_headers
+          post :receive, payload
+          expect(ActionMailer::Base.deliveries.count).to eq(0)
+        end
+      end
+
+      context 'the webhook data does not have plan names' do
+
+        let(:payload) do
+          StripeMock.mock_webhook_event('invoice.payment_succeeded').to_s
+        end
+
+        it 'does not raise an error when trying to filter on plan name' do
+          with_feature_enabled(:alaveteli_pro) do
+            request.headers.merge! signed_headers
+            expect{ post :receive, payload }.not_to raise_error
+          end
+        end
+
+      end
+
+    end
+
   end
 
 end

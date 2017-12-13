@@ -2,7 +2,7 @@
 # Does not inherit from AlaveteliPro::BaseController because it doesn't need to
 class AlaveteliPro::StripeWebhooksController < ApplicationController
 
-  before_action :read_event_notification, :check_for_event_type
+  before_action :read_event_notification, :check_for_event_type, :filter_hooks
 
   class UnhandledStripeWebhookError < StandardError ; end
 
@@ -67,4 +67,33 @@ class AlaveteliPro::StripeWebhooksController < ApplicationController
     end
   end
 
+  # ignore any that don't match our plan namespace
+  def filter_hooks
+    plans = []
+    case @stripe_event.data.object.object
+    when 'subscription'
+      plans = get_plan_names(@stripe_event.data.object.items)
+    when 'invoice'
+      plans = get_plan_names(@stripe_event.data.object.lines)
+    end
+
+    # ignore any plans that don't start with our namespace
+    plans.delete_if { |plan| !plan_matches_namespace(plan) }
+
+    if plans.empty?
+      # reject it and throw it away, the emails are just noise
+      render json: { error: 'Does not appear to be one of our plans' },
+             status: 401
+      return
+    end
+  end
+
+  def plan_matches_namespace(plan_name)
+    (AlaveteliConfiguration.stripe_namespace == '' ||
+     plan_name =~ /^#{AlaveteliConfiguration.stripe_namespace}/)
+  end
+
+  def get_plan_names(items)
+    items.map { |item| item.plan.name if item.plan }.compact.uniq
+  end
 end
