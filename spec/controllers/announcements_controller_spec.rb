@@ -1,6 +1,6 @@
 require 'spec_helper'
 
-RSpec.describe AnnouncementController, type: :controller do
+RSpec.describe AnnouncementsController, type: :controller do
 
   describe '#destroy' do
     context 'not logged in' do

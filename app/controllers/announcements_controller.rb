@@ -1,4 +1,4 @@
-class AnnouncementController < ApplicationController
+class AnnouncementsController < ApplicationController
   before_action :authenticate
 
   def destroy

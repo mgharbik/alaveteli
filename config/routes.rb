@@ -410,7 +410,7 @@ Rails.application.routes.draw do
   ####
 
   #### Announcement controller
-  resources :announcement, :only => [:destroy]
+  resources :announcements, :only => [:destroy]
   ####
 
   #### AdminPublicBody controller
