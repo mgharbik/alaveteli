@@ -596,7 +596,7 @@ Rails.application.routes.draw do
 
   #### AdminAnnouncement controller
   scope '/admin', :as => 'admin' do
-    resources :announcements, :controller => 'admin_announcement'
+    resources :announcements, :controller => 'admin_announcements'
   end
   ####
 

@@ -2,19 +2,17 @@
   <% if announcements.size > 0 %>
     <table class="table table-condensed table-hover span12 announcement-list">
       <tr>
-        <th>Id</th>
-        <% Announcement.content_columns.each do |column| %>
-          <th><%= column.name.humanize %></th>
-        <% end %>
+        <th>ID</th>
+        <th>Announcement</th>
+        <th>Created at</th>
         <th>Actions</th>
       </tr>
 
       <% announcements.each do |announcement| %>
         <tr class="<%= cycle('odd', 'even') %>">
           <td class="id"><%=h announcement.id %></td>
-          <% Announcement.content_columns.map { |c| c.name }.each do |column| %>
-            <td class="<%= column %>"><%=h announcement.send(column) %></td>
-          <% end %>
+          <td class="announcement"><%=h announcement.title %></td>
+          <td class="created_at"><%=h announcement.created_at %></td>
           <td>
             <%= link_to 'Edit', edit_admin_announcement_path(announcement) %>
           </td>
