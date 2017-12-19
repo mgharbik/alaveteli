@@ -4,6 +4,9 @@ class Announcement < ActiveRecord::Base
            inverse_of: :announcement,
            dependent: :destroy
 
+  translates :title, :content
+  include Translatable
+
   default_scope -> { order(created_at: :asc) }
   scope :for_user, -> (user) {
     return unless user

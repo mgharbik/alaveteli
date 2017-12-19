@@ -1,12 +1,15 @@
 class AdminAnnouncementsController < AdminController
   before_action :set_announcement, only: %i[edit update destroy]
 
+  include TranslatableParams
+
   def index
     @announcements = Announcement.all
   end
 
   def new
     @announcement = Announcement.new
+    @announcement.build_all_translations
   end
 
   def create
@@ -20,6 +23,7 @@ class AdminAnnouncementsController < AdminController
   end
 
   def edit
+    @announcement.build_all_translations
   end
 
   def update
@@ -40,8 +44,9 @@ class AdminAnnouncementsController < AdminController
   private
 
   def announcement_params
-    if params[:announcement]
-      params.require(:announcement).permit(:title, :content)
+    if announcement_params = params[:announcement]
+      keys = { translated_keys: [:locale, :title, :content] }
+      translatable_params(keys, announcement_params)
     else
       {}
     end
