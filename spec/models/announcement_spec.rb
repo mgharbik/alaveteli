@@ -1,27 +1,28 @@
 require 'spec_helper'
 
 RSpec.describe Announcement, type: :model do
-  describe '.for_user' do
-    let!(:user_1) { FactoryGirl.create(:user) }
-    let!(:user_2) { FactoryGirl.create(:user) }
-    let!(:announcement_all) do
-      FactoryGirl.create(:announcement, title: 'All')
-    end
-    let!(:announcement_user_1) do
-      FactoryGirl.create(:announcement, title: 'User 1', dismissed_by: user_2)
-    end
-    let!(:announcement_none) do
-      FactoryGirl.create(:announcement, title: 'None',
-                                        dismissed_by: [user_1, user_2])
+  describe 'scopes' do
+    let!(:user1) { FactoryGirl.create(:user) }
+    let!(:user2) { FactoryGirl.create(:user) }
+    let!(:announcements) do
+      {
+        generic: FactoryGirl.create(:announcement),
+        user1: FactoryGirl.create(:announcement, dismissed_by: user2),
+        nobody: FactoryGirl.create(:announcement, dismissed_by: [user1, user2])
+      }
     end
 
-    it 'only returns undismissed announcements' do
-      expect(Announcement.for_user(user_1)).to match_array(
-        [announcement_all, announcement_user_1]
-      )
-      expect(Announcement.for_user(user_2)).to match_array(
-        [announcement_all]
-      )
+    def announcements_for(*keys)
+      announcements.values_at(*keys)
+    end
+
+    describe '.for_user' do
+      it 'returns undismissed announcements' do
+        expect(Announcement.for_user(user1)).
+          to match_array(announcements_for(:generic, :user1))
+        expect(Announcement.for_user(user2)).
+          to match_array(announcements_for(:generic))
+      end
     end
   end
 
