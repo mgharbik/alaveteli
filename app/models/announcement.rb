@@ -24,8 +24,9 @@ class Announcement < ActiveRecord::Base
       'announcement_dismissals WHERE user_id = :user_id)',
       user_id: user
     ).
-    # does the announcement have the same visibility role as the user or set to
-    # be visible to everyone
+
+    # does the announcement have the same visibility role as the user or set
+    # to be visible to everyone
     where(
       'announcements.visibility = \'everyone\' OR ' \
       'announcements.visibility IN (' \
@@ -35,6 +36,10 @@ class Announcement < ActiveRecord::Base
       ')',
       user_id: user
     )
+  }
+
+  scope :for_user_with_roles, -> (user, *roles) {
+    for_user(user).visible_to(roles)
   }
 
   validates :content, :user,
