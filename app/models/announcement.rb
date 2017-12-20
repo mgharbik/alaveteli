@@ -1,4 +1,6 @@
 class Announcement < ActiveRecord::Base
+  SITE_WIDE = 'everyone'.freeze
+
   belongs_to :user,
              inverse_of: :announcements
   has_many :dismissals,
@@ -10,6 +12,9 @@ class Announcement < ActiveRecord::Base
   include Translatable
 
   default_scope -> { order(created_at: :asc) }
+  scope :site_wide, -> { visible_to(SITE_WIDE) }
+  scope :visible_to, -> (visible_to) { where(visibility: visible_to) }
+
   scope :for_user, -> (user) {
     return unless user
 
@@ -36,5 +41,5 @@ class Announcement < ActiveRecord::Base
             presence: true
   validates :visibility,
             presence: true,
-            inclusion: { in: %w(everyone) + Role.allowed_roles }
+            inclusion: { in: [SITE_WIDE] + Role.allowed_roles }
 end
