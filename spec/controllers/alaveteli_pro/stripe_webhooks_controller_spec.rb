@@ -8,6 +8,22 @@ describe AlaveteliPro::StripeWebhooksController do
 
     let(:config_secret) { 'whsec_secret' }
     let(:signing_secret) { config_secret }
+    let(:stripe_helper) { StripeMock.create_test_helper }
+
+    let(:stripe_subscription) do
+      customer = Stripe::Customer.
+                   create(source: stripe_helper.generate_card_token)
+      plan = Stripe::Plan.create(
+               id: 'test',
+               name: 'Test',
+               amount: 10,
+               currency: 'gpp',
+               interval: 'monthly')
+      Stripe::Subscription.create(
+        customer: customer,
+        plan: 'test'
+      )
+    end
 
     let(:stripe_event) do
       StripeMock.mock_webhook_event('customer.subscription.deleted')
@@ -243,6 +259,52 @@ describe AlaveteliPro::StripeWebhooksController do
           request.headers.merge! signed_headers
           post :receive, payload
           expect(user.reload.is_pro?).to be false
+        end
+      end
+
+    end
+
+    describe 'updating the Stripe charge description when a payment succeeds' do
+
+      let(:paid_invoice) do
+        invoice = Stripe::Invoice.create(
+          lines: [
+            {
+              data: {
+                id: stripe_subscription.id,
+                subscription_item: stripe_subscription.items.data.first.id,
+                amount: 100,
+                currency: 'gbp',
+                type: 'subscription'
+              },
+              plan: { id: 'test', name: 'Test'}
+            }
+          ],
+          subscription: stripe_subscription.id
+        )
+        invoice.pay
+      end
+
+      let(:charge) { Stripe::Charge.retrieve(paid_invoice.charge) }
+
+      let(:stripe_event) do
+        StripeMock.mock_webhook_event('invoice.payment_succeeded',
+          {
+            lines: paid_invoice.lines,
+            currency: 'gbp',
+            charge: paid_invoice.charge,
+            subscription: paid_invoice.subscription
+          }
+        )
+      end
+
+      it 'removes the pro role from the associated user' do
+        with_feature_enabled(:alaveteli_pro) do
+          expect(charge.description).to be nil
+          request.headers.merge! signed_headers
+          post :receive, payload
+          expect(Stripe::Charge.retrieve(charge.id).description).
+            to eq('Alaveteli Professional')
         end
       end
 
