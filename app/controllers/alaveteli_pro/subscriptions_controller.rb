@@ -91,9 +91,13 @@ class AlaveteliPro::SubscriptionsController < AlaveteliPro::BaseController
     end
 
     current_user.add_role(:pro)
-    AlaveteliFeatures.
-      backend.
-        enable_actor(:accept_mail_from_poller, current_user)
+
+    if AlaveteliConfiguration.production_mailer_retriever_method == 'pop'
+      AlaveteliFeatures.
+        backend.
+          enable_actor(:accept_mail_from_poller, current_user)
+    end
+
     AlaveteliFeatures.backend.enable_actor(:notifications, current_user)
 
     flash[:notice] =
