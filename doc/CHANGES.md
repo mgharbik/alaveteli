@@ -2,6 +2,7 @@
 
 ## Highlighted Features
 
+* Restore translated attributes to Public Body admin view (Gareth Rees)
 * Fix bug in `stats:show` task (Liz Conlan, Gareth Rees)
 * Use `.eml` file extension when downloading raw emails through the admin
   interface (Gareth Rees)
