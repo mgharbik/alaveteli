@@ -1,6 +1,6 @@
 require 'spec_helper'
 
-RSpec.describe AnnouncementDismissal, type: :model do
+describe AnnouncementDismissal do
   it 'requires a announcement' do
     dismissal = FactoryGirl.build(:announcement_dismissal, announcement: nil)
     expect(dismissal).not_to be_valid

@@ -1,6 +1,6 @@
 require 'spec_helper'
 
-RSpec.describe Announcement, type: :model do
+describe Announcement do
   describe 'scopes' do
     let!(:admin) { FactoryGirl.create(:admin_user) }
     let!(:user) { FactoryGirl.create(:user) }
