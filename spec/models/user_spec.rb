@@ -138,6 +138,61 @@ describe User, " when authenticating" do
 
 end
 
+describe User, 'password hashing algorithms' do
+  let(:hashed_password) { nil }
+  let(:salt) { nil }
+  let!(:user) do
+    User.create(
+      name: 'User',
+      email: 'user@localhost',
+      hashed_password: hashed_password,
+      salt: salt
+    )
+  end
+  let(:found_user) do
+    User.authenticate_from_form(
+      email: 'user@localhost', password: 'jonespassword'
+    )
+  end
+
+  context 'password hashed with SHA1' do
+    # object_id.to_s + rand.to_s
+    let(:salt) { '701486499852200.07409853368152741' }
+    # Digest::SHA1.hexdigest('jonespassword' + self.salt)
+    let(:hashed_password) { '8dc6e4d82ee61a3a1724e9f5053e1bef892dc3ca' }
+
+    it 'should find the user when given the right email and password' do
+      expect(found_user.errors.size).to eq(0)
+      expect(found_user).to eq(user)
+    end
+
+  end
+
+  context 'password hashed with SHA1 and then bcrypt' do
+    # object_id.to_s + rand.to_s
+    let(:salt) { '701486609569600.08392293204545553' }
+    # BCrypt::Password.create(Digest::SHA1.hexdigest('jonespassword' + self.salt))
+    let(:hashed_password) { '$2a$10$rNWVOXDmMZDlLz.6InmE1.7NvD7vp2KQ5iFSVSuXUVDcw0QzmLfO.' }
+
+    it 'should find the user when given the right email and password' do
+      expect(found_user.errors.size).to eq(0)
+      expect(found_user).to eq(user)
+    end
+  end
+
+  context 'password hashed with bcrypt' do
+    # BCrypt::Password.create('jonespassword')
+    let(:hashed_password) { '$2a$10$f8RWgVTYJ.gc/wwINMYIfeHayceTNALtTgVP0xrVrnVFbcCCgpT7C' }
+
+    it 'should find the user when given the right email and password' do
+      expect(found_user.errors.size).to eq(0)
+      expect(found_user).to eq(user)
+    end
+
+  end
+
+end
+
 describe User, " when saving" do
   before do
     @user = User.new
