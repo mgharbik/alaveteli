@@ -2,7 +2,7 @@
 require 'spec_helper'
 require 'stripe_mock'
 
-describe AlaveteliPro::StripeWebhooksController do
+describe AlaveteliPro::StripeWebhooksController, feature: :pro_pricing do
 
   describe '#receive' do
 
@@ -14,7 +14,6 @@ describe AlaveteliPro::StripeWebhooksController do
     end
 
     before do
-      AlaveteliFeatures.backend.enable(:pro_pricing)
       config = MySociety::Config.load_default
       config['STRIPE_WEBHOOK_SECRET'] = config_secret
       config['STRIPE_NAMESPACE'] = ''
@@ -22,7 +21,6 @@ describe AlaveteliPro::StripeWebhooksController do
     end
 
     after do
-      AlaveteliFeatures.backend.disable(:pro_pricing)
       StripeMock.stop
     end
 
