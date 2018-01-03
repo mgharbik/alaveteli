@@ -40,13 +40,23 @@ module User::Authenication
 
     sha1_password = User.sha1_password(password, salt)
     if bcrypt_password == sha1_password # password been rehashed
+      attempt_password_upgrade(password)
       true
 
     elsif hashed_password == sha1_password # password not rehashed
+      attempt_password_upgrade(password)
       true
 
     else # password invalid
       false
     end
+  end
+
+  private
+
+  def attempt_password_upgrade(password)
+    self.password = password
+    self.salt = nil
+    save # might fail due to newer password requirements
   end
 end

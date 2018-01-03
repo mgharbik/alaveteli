@@ -166,6 +166,10 @@ describe User, 'password hashing algorithms' do
       expect(found_user).to eq(user)
     end
 
+    it 'updates hashed password with bcrypt version' do
+      expect(found_user.hashed_password).to match(/^\$2[ayb]\$.{56}$/)
+    end
+
   end
 
   context 'password hashed with SHA1 and then bcrypt' do
@@ -178,6 +182,11 @@ describe User, 'password hashing algorithms' do
       expect(found_user.errors.size).to eq(0)
       expect(found_user).to eq(user)
     end
+
+    it 'updates hashed password with bcrypt version' do
+      expect(found_user.hashed_password).to match(/^\$2[ayb]\$.{56}$/)
+    end
+
   end
 
   context 'password hashed with bcrypt' do
